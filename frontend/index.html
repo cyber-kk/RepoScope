@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RepoScope — GitHub Repository Analyzer</title>
+  <meta name="description" content="RepoScope is a fast, open analytics dashboard for any public GitHub repository." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%237c5cff'/%3E%3Cpath d='M32 12a20 20 0 0 0-6.3 39c1 .2 1.4-.5 1.4-1.1v-3.9c-5.6 1.2-6.8-2.7-6.8-2.7-.9-2.4-2.3-3-2.3-3-1.9-1.3.1-1.2.1-1.2 2 .1 3.1 2.1 3.1 2.1 1.8 3.1 4.7 2.2 5.9 1.7.2-1.3.7-2.2 1.3-2.7-4-.5-8.2-2-8.2-9 0-2 .7-3.6 1.9-4.9-.2-.5-.8-2.4.2-4.9 0 0 1.5-.5 5 1.9a17.3 17.3 0 0 1 9.2 0c3.5-2.4 5-1.9 5-1.9 1 2.5.4 4.4.2 4.9 1.2 1.3 1.9 2.9 1.9 4.9 0 7-4.2 8.5-8.2 9 .6.6 1.2 1.7 1.2 3.5v5.2c0 .6.4 1.3 1.4 1.1A20 20 0 0 0 32 12Z' fill='white'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="brand" aria-label="RepoScope home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="32" height="32">
+            <rect width="64" height="64" rx="14" fill="currentColor" />
+            <path d="M32 12a20 20 0 0 0-6.3 39c1 .2 1.4-.5 1.4-1.1v-3.9c-5.6 1.2-6.8-2.7-6.8-2.7-.9-2.4-2.3-3-2.3-3-1.9-1.3.1-1.2.1-1.2 2 .1 3.1 2.1 3.1 2.1 1.8 3.1 4.7 2.2 5.9 1.7.2-1.3.7-2.2 1.3-2.7-4-.5-8.2-2-8.2-9 0-2 .7-3.6 1.9-4.9-.2-.5-.8-2.4.2-4.9 0 0 1.5-.5 5 1.9a17.3 17.3 0 0 1 9.2 0c3.5-2.4 5-1.9 5-1.9 1 2.5.4 4.4.2 4.9 1.2 1.3 1.9 2.9 1.9 4.9 0 7-4.2 8.5-8.2 9 .6.6 1.2 1.7 1.2 3.5v5.2c0 .6.4 1.3 1.4 1.1A20 20 0 0 0 32 12Z" fill="white"/>
+          </svg>
+        </span>
+        <span class="brand-name">RepoScope</span>
+      </a>
+      <nav class="header-nav">
+        <a href="https://github.com/cyber-kk/RepoScope" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="/api/docs" target="_blank">API</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero / search -->
+    <section class="hero">
+      <h1>Scope any GitHub repository in seconds.</h1>
+      <p class="hero-sub">
+        RepoScope aggregates stars, languages, contributors, commit activity, issues,
+        pull requests, releases, and the file tree of any public repository into a single
+        dashboard — powered by a Python FastAPI backend and a Chart.js frontend.
+      </p>
+      <form id="search-form" class="search-form" autocomplete="off">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path fill="currentColor" d="M12 .5A11.5 11.5 0 0 0 .5 12 11.5 11.5 0 0 0 12 23.5c2.3 0 4.4-.7 6.2-1.9l3.6 3.6 2.6-2.6-3.6-3.6A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Zm0 3a8.5 8.5 0 1 1 0 17 8.5 8.5 0 0 1 0-17Z"/>
+          </svg>
+          <input id="search-input" type="text" placeholder="owner/repo  or  https://github.com/owner/repo" />
+        </div>
+        <button id="search-button" type="submit">Analyze</button>
+      </form>
+      <div class="suggestions">
+        Try:
+        <button class="chip" data-repo="facebook/react">facebook/react</button>
+        <button class="chip" data-repo="torvalds/linux">torvalds/linux</button>
+        <button class="chip" data-repo="fastapi/fastapi">fastapi/fastapi</button>
+        <button class="chip" data-repo="microsoft/vscode">microsoft/vscode</button>
+      </div>
+    </section>
+
+    <!-- Loading / error states -->
+    <section id="state-section" class="state-section" hidden>
+      <div id="loading-card" class="state-card" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Fetching repository data from GitHub…</p>
+      </div>
+      <div id="error-card" class="state-card state-card--error" hidden>
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+          <path fill="currentColor" d="M12 2 1 21h22L12 2Zm0 6 7.5 13h-15L12 8Zm-1 4v4h2v-4h-2Zm0 5v2h2v-2h-2Z"/>
+        </svg>
+        <p id="error-message">Something went wrong.</p>
+        <p id="error-detail" class="muted"></p>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section id="results" class="results" hidden>
+      <!-- Repo header -->
+      <header class="repo-header">
+        <div class="repo-header-main">
+          <img id="repo-avatar" class="repo-avatar" alt="" src="" />
+          <div>
+            <h2 id="repo-title">—</h2>
+            <p id="repo-description" class="repo-description muted"></p>
+            <div id="repo-topics" class="topics"></div>
+          </div>
+        </div>
+        <div class="repo-header-meta">
+          <a id="repo-link" class="btn btn-ghost" href="#" target="_blank" rel="noreferrer">Open on GitHub ↗</a>
+          <span id="repo-license" class="meta-pill"></span>
+        </div>
+      </header>
+
+      <!-- Metric cards -->
+      <div class="metrics-grid" id="metrics-grid">
+        <div class="metric-card"><span class="metric-label">★ Stars</span><span class="metric-value" id="m-stars">—</span></div>
+        <div class="metric-card"><span class="metric-label">⑂ Forks</span><span class="metric-value" id="m-forks">—</span></div>
+        <div class="metric-card"><span class="metric-label">👁 Watchers</span><span class="metric-value" id="m-watchers">—</span></div>
+        <div class="metric-card"><span class="metric-label">⚠ Open Issues</span><span class="metric-value" id="m-issues">—</span></div>
+        <div class="metric-card"><span class="metric-label">🔀 Open PRs</span><span class="metric-value" id="m-prs">—</span></div>
+        <div class="metric-card"><span class="metric-label">📦 Size</span><span class="metric-value" id="m-size">—</span></div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid">
+        <div class="chart-card chart-card--wide">
+          <h3>Commit activity (last 52 weeks)</h3>
+          <div class="chart-container"><canvas id="chart-commits"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Languages</h3>
+          <div class="chart-container"><canvas id="chart-languages"></canvas></div>
+          <div id="lang-legend" class="lang-legend"></div>
+        </div>
+        <div class="chart-card chart-card--wide">
+          <h3>Top contributors</h3>
+          <div class="chart-container"><canvas id="chart-contributors"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab tab-active" data-tab="overview">Overview</button>
+        <button class="tab" data-tab="contributors">Contributors</button>
+        <button class="tab" data-tab="commits">Commits</button>
+        <button class="tab" data-tab="issues">Issues & PRs</button>
+        <button class="tab" data-tab="releases">Releases</button>
+        <button class="tab" data-tab="readme">README</button>
+        <button class="tab" data-tab="files">Files</button>
+      </div>
+
+      <div class="tab-panel tab-panel--active" id="panel-overview">
+        <div class="info-grid">
+          <div class="info-card">
+            <h4>Repository</h4>
+            <dl id="repo-meta-list"></dl>
+          </div>
+          <div class="info-card">
+            <h4>Activity</h4>
+            <dl id="activity-meta-list"></dl>
+          </div>
+          <div class="info-card">
+            <h4>Engagement</h4>
+            <dl id="engagement-meta-list"></dl>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panel-contributors">
+        <div id="contributors-list" class="contributors-grid"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-commits">
+        <div id="commits-list" class="commits-list"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-issues">
+        <div class="info-grid">
+          <div class="info-card">
+            <h4>Issues</h4>
+            <dl id="issues-stats-list"></dl>
+            <h5 class="subhead">Recent open issues</h5>
+            <ul id="recent-issues-list" class="item-list"></ul>
+          </div>
+          <div class="info-card">
+            <h4>Pull Requests</h4>
+            <dl id="prs-stats-list"></dl>
+            <h5 class="subhead">Recent open PRs</h5>
+            <ul id="recent-prs-list" class="item-list"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panel-releases">
+        <div id="releases-list" class="releases-list"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-readme">
+        <article id="readme-content" class="readme markdown-body">No README available.</article>
+      </div>
+
+      <div class="tab-panel" id="panel-files">
+        <ul id="files-list" class="files-list"></ul>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <p>
+        Built with Python · FastAPI · vanilla JavaScript · Chart.js.
+        Data from the public GitHub REST API.
+        <a href="https://github.com/cyber-kk/RepoScope" target="_blank" rel="noreferrer">View source ↗</a>
+      </p>
+    </footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+  <script src="charts.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
